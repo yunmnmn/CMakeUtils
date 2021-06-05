@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.13.1)
 
 include_guard(GLOBAL) 
 
+# Returns a postfix of a path depending on the platform
 function(PlatformPath ret)
    if(WIN32)
       set(${ret} _Platform/Win PARENT_SCOPE)
@@ -9,12 +10,12 @@ function(PlatformPath ret)
    #Add more paths when it's supported
 endfunction()
 
-
+# Gather the Platform specific source files, and return them
 function(PlatformSource source)
    #  All platform files are called PlatformFile.cmake
    set(platformCMakeFileName PlatformFile)
 
-   # Find the platform path
+   # Get the platform path
    PlatformPath(platformPath)
 
    # TODO: hardcoded source
@@ -39,4 +40,10 @@ function(PlatformSource source)
 
    # Set the file's sources into the Source variable
    set(${source} ${absoluteFilePaths} PARENT_SCOPE)
+endfunction()
+
+function(GenerateFolderStructure target)
+   get_property(_targetSourceFiles TARGET ${target} PROPERTY SOURCES)
+   source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}"
+            FILES ${_targetSourceFiles})
 endfunction()
