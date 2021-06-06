@@ -10,36 +10,48 @@ function(PlatformPath ret)
    #Add more paths when it's supported
 endfunction()
 
+function(PlatformSource _source)
+   # Get the platform path
+   PlatformPath(_platformPath)
+
+   # TODO: hardcoded source
+   set(_platformSource Source/${_platformPath})
+   PlatformSourceInternal(${_platformSource} _sourceInternal)
+   list(APPEND _sourceInternalAccum ${_sourceInternal})
+
+   set(_platformInclude Include/${_platformPath})
+   PlatformSourceInternal(${_platformInclude} _sourceInternal)
+   list(APPEND _sourceInternalAccum ${_sourceInternal})
+
+   set(${_source} ${_sourceInternalAccum} PARENT_SCOPE)
+endfunction()
+
 # Gather the Platform specific source files, and return them
-function(PlatformSource source)
+function(PlatformSourceInternal _path _sourceInternal)
    #  All platform files are called PlatformFile.cmake
    set(platformCMakeFileName PlatformFile)
 
-   # Get the platform path
-   PlatformPath(platformPath)
-
    # TODO: hardcoded source
-   set(platformRoot Source/${platformPath})
-   get_filename_component(platformRoot ${platformRoot} ABSOLUTE)
+   get_filename_component(${_path} ${_path} ABSOLUTE)
 
-   set(platformPath Source/${platformPath}/${platformCMakeFileName}.cmake)
-   get_filename_component(platformPath ${platformPath} ABSOLUTE)
+   set(_platformPath ${_path}/${platformCMakeFileName}.cmake)
+   get_filename_component(_platformPath ${_platformPath} ABSOLUTE)
 
    # Find the platform path
-   include(${platformPath})
+   include(${_platformPath})
 
    # Go through all sources referenced in the file, and validate if they exist
-   foreach(file ${sources})
-      get_filename_component(absolutePath ${platformRoot}/${file} ABSOLUTE)
-      if(NOT EXISTS ${absolutePath})
+   foreach(file ${_files})
+      get_filename_component(_absolutePath ${_path}/${file} ABSOLUTE)
+      if(NOT EXISTS ${_absolutePath})
          #TODO: proper error message
-         message(FATAL_ERROR "Can't find file")
+         message(FATAL_ERROR "Can't find file ${file}")
       endif()
-      list(APPEND absoluteFilePaths ${absolutePath} )
+      list(APPEND _absoluteFilePaths ${_absolutePath} )
    endforeach()
 
    # Set the file's sources into the Source variable
-   set(${source} ${absoluteFilePaths} PARENT_SCOPE)
+   set(${_sourceInternal} ${_absoluteFilePaths} PARENT_SCOPE)
 endfunction()
 
 function(GenerateFolderStructure target)
@@ -47,3 +59,4 @@ function(GenerateFolderStructure target)
    source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}"
             FILES ${_targetSourceFiles})
 endfunction()
+
