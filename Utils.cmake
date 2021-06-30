@@ -15,10 +15,12 @@ function(PlatformSource _source)
    PlatformPath(_platformPath)
 
    # TODO: hardcoded source
+   # GET all the platform specific source files from the "PlatformFile.cmake"
    set(_platformSource Source/${_platformPath})
    PlatformSourceInternal(${_platformSource} _sourceInternal)
    list(APPEND _sourceInternalAccum ${_sourceInternal})
 
+   # GET all the platform specific header files from the "PlatformFile.cmake"
    set(_platformInclude Include/${_platformPath})
    PlatformSourceInternal(${_platformInclude} _sourceInternal)
    list(APPEND _sourceInternalAccum ${_sourceInternal})
@@ -41,6 +43,7 @@ function(PlatformSourceInternal _path _sourceInternal)
    include(${_platformPath})
 
    # Go through all sources referenced in the file, and validate if they exist
+   # NOTE: _files is set from the platform specific .cmake file
    foreach(file ${_files})
       get_filename_component(_absolutePath ${_path}/${file} ABSOLUTE)
       if(NOT EXISTS ${_absolutePath})
